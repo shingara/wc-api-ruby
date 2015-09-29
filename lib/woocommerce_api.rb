@@ -95,8 +95,7 @@ module WooCommerce
       url = @url
       url = "#{url}/" unless url.end_with? "/"
       url = "#{url}wc-api/#{@version}/#{endpoint}"
-
-      @is_ssl ? url : oauth_url(url, method)
+      @is_ssl ? ssl_url(url) : oauth_url(url, method)
     end
 
     # Internal: Requests default options.
@@ -117,15 +116,19 @@ module WooCommerce
           "Accept" => "application/json"
         }
       }
-      if @is_ssl
-        options.merge!(basic_auth: {
-          username: @consumer_key,
-          password: @consumer_secret
-        })
-      end
-      options.merge!(body: data.to_json) if !data.empty?
-
+      options.merge!(body: data.to_json) if data
       HTTParty.send(method, url, options)
+    end
+
+    # Internal: Generates the URL used for ssl connections
+    #
+    # url    - A String naming the current request url
+    #
+    # Returns a url to be used for the query.
+    def ssl_url(url)
+      add_query_params(url,
+                       consumer_key: @consumer_key,
+                       consumer_secret: @consumer_secret)
     end
 
     # Internal: Generates an oauth url given current settings
