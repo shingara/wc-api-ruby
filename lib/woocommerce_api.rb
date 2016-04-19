@@ -116,7 +116,7 @@ module WooCommerce
           "Accept" => "application/json"
         }
       })
-      options.merge!(body: data.to_json) if data
+      options.merge!(body: data.to_json) if !data.empty?
       HTTParty.send(method, url, options)
     end
 
